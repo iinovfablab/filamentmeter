@@ -23,19 +23,19 @@ class Logger:
         self.errorLevel = errorLevel
 
     def error(self, message):
-        print("[ERROR] %s" % (message,))
+        print(f"[ERROR] {message}")
 
     def warning(self, message):
         if self.errorLevel >= 1:
-            print("[WARNING] %s" % (message,))
+            print(f"[WARNING] {message}")
 
     def info(self, message):
         if self.errorLevel >= 2:
-            print("[INFO] %s" % (message,))
+            print(f"[INFO] {message}")
 
     def debug(self, message):
         if self.errorLevel >= 3:
-            print("[DEBUG] %s" % (message,))
+            print(f"[DEBUG] {message}")
 
 class MqttListener:
     def __init__(self, logger=None, host=None, port=None, username=None, password=None, client_id=None, topic=None, keepAlive=30):
@@ -61,7 +61,7 @@ class MqttListener:
         self.client.on_disconnect = self.on_disconnect
        # self.client.on_publish = self.on_publish
         
-        self.logger.debug("||PROGRAMA INICIADO COMO CLIENT_ID: %s ||" % (client_id,))
+        self.logger.debug(f"||PROGRAMA INICIADO COMO CLIENT_ID: {(client_id,)} ||")
 
     def start(self):
         self.run()
@@ -81,12 +81,12 @@ class MqttListener:
         self.profiles.append(profile)
 
     def on_connect(self, client, userdata, flags, rc):
-        self.logger.debug("|| CONECTADO EM %s:%d AS %s ||" % (self.host, self.port, self.client._client_id))
+        self.logger.debug(f"|| CONECTADO EM {self.host}:{self.port} AS {self.client._client_id} ||")
         client.subscribe(self.topic)
-        self.logger.debug("|| SUBSCREVENDO EM %s ||" % (self.topic,))
+        self.logger.debug(f"|| SUBSCREVENDO EM {(self.topic,)} ||")
     
     def publish(self, topic, msg):
-        self.logger.debug("|| Publicando no topico %s AS %s ||" % (topic, msg))
+        self.logger.debug(f"|| Publicando no topico {topic} AS {msg} ||")
         self.client.publish(topic ,msg)
 
     def on_message(self, client, userdata, message):

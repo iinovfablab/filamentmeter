@@ -16,7 +16,7 @@ class DetectaEnvento:
         return topic == "inovfablab/filamento" 
     
     def on_publish(self, topic, msg):
-            self.logger.debug("|| Publicando no topico %s AS %s ||" % (topic, msg))
+            self.logger.debug(f"|| Publicando no topico {topic} AS {msg} ||")
             self.MqttListener.publish(topic,msg)
 
     def onDataReceived(self, topic, payload,logger=None,):
@@ -24,7 +24,7 @@ class DetectaEnvento:
                 
         if topic.endswith("filamento"):
 
-            self.logger.debug("|| mensagem recebidas %s ||" % (data))
+            self.logger.debug(f"|| mensagem recebidas {data} ||")
 
      
     
