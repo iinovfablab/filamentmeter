@@ -1,5 +1,5 @@
-from infrastructure import Logger, Config,  MqttListener
-import profiles
+from src.infrastructure import Logger, Config,  MqttListener
+from src.profiles import DetectaEnvento
 
 if __name__ == "__main__":
     config = Config()
@@ -15,7 +15,7 @@ if __name__ == "__main__":
         config.broker['keepAlive'])
 
     #profileGeladeira = profiles.Geladeira(logger, database, "tele/SmartEng_Geladeira_008506/SENSOR")
-    profileDetectaEvento = profiles.DetectaEnvento(logger,"inovfablab/filamento",mqttListener)
+    profileDetectaEvento = DetectaEnvento(logger,"inovfablab/filamento",mqttListener)
    
     #mqttListener.registerProfile(profileGeladeira)
     mqttListener.registerProfile(profileDetectaEvento)
