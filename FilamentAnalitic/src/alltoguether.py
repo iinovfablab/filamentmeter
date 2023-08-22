@@ -1,6 +1,5 @@
 import json
 import numpy as np
-import datetime
 from paho.mqtt import client as clientMQTT
 import time
 import json
@@ -34,7 +33,7 @@ if __name__ == "__main__":
 
 class DetectaEnvento:
     def __init__(self, logger=None, device=None, MqttListener=None):
-     
+        pass
     
     def canHandle(self, topic):
         return topic == "%s/SENSOR" % (self.device,) 

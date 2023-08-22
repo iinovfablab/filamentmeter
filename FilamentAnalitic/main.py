@@ -16,7 +16,7 @@ if __name__ == "__main__":
 
     #profileGeladeira = profiles.Geladeira(logger, database, "tele/SmartEng_Geladeira_008506/SENSOR")
     profileDetectaEvento = DetectaEnvento(logger,"inovfablab/filamento",mqttListener)
-   
+    
     #mqttListener.registerProfile(profileGeladeira)
     mqttListener.registerProfile(profileDetectaEvento)
 

@@ -18,6 +18,7 @@ class Config:
         self.errorLevel = 3
         self.mainTopic = "inovfablab/filamento"
 
+
 class Logger:
     def __init__(self, errorLevel=3):
         self.errorLevel = errorLevel
@@ -36,6 +37,7 @@ class Logger:
     def debug(self, message):
         if self.errorLevel >= 3:
             print(f"[DEBUG] {message}")
+
 
 class MqttListener:
     def __init__(self, logger=None, host=None, port=None, username=None, password=None, client_id=None, topic=None, keepAlive=30):
