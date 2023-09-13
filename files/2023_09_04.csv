@@ -1,0 +1,3 @@
+consumo(minutos),id,username,data_inicio,data_fim,curso,email,consumo_material(cm)
+30.0,1019,BrunaSFernandes,2023-09-04 19:00:00,2023-09-04 19:30:00,ALUNO - UNISANTA - Engenharia de Produção,brunasfernandes1901@gmail.com,338
+90.0,1031,Vinicius José,2023-09-04 12:00:00,2023-09-04 13:30:00,ALUNO - UNISANTA - Engenharia de Produção,viniciusjose20@hotmail.com,0
