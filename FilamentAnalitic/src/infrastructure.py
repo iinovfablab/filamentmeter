@@ -9,9 +9,10 @@ class Config:
         self.broker = {
             'host': '20.226.11.46',
             'port': 1883,
-            'client_id': '',
-            'user': 'usuarioaqui',
-            'password': 'senhaMqttAqui',
+            'client_id': "",
+            'user': "",                 
+            'password': "",
+
             'keepAlive': 30,
         }
     

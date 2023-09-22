@@ -1,6 +1,8 @@
 import datetime
+from typing import Any, Iterable
 import pandas as pd
 import os
+from connections.connection_mongo import ConnectionMongo
 
 def convert_dt(dt) -> list():
     fdate = str(dt.datetime.now()).split()[0]
@@ -11,13 +13,6 @@ def reverse_key_to_value(d: list) -> dict:
     return dict(map(lambda x: x[::-1], d))
 
 
-def read_file_list(level, path=False, dirname="files"):
-    current_path = "\\".join(os.path.abspath(__file__).split('\\')[:-level])
-    path_file = os.path.join(current_path, dirname)
-    if not path:
-        files = list(filter(lambda x: x.endswith(".xlsx"), os.listdir(os.path.abspath(path_file))))
-        return files
-    return path_file
 
 def insert_row_distinct(df):
     fuso = datetime.timedelta(hours=3)
@@ -59,15 +54,51 @@ def insert_row_distinct(df):
         
     return pd.concat(dfs, ignore_index=True)
 
-def check_date_time(df) -> list:
-    now = datetime.datetime.now()
-    #fmt = "%Y-%m-%d %H:%M:%S"
+
+
+def check_if_exists(df) -> Any:
+
+    manga = ConnectionMongo()
     
-    #actual_date = datetime.datetime.strptime(now.strftime("%Y-%m-%d %H:%M:%S"), fmt)
-    #actual_date = datetime.datetime.strptime(date_cmp,fmt)
+    for r in df.iloc[:,0]:
+        result = manga.query({"id":{"$eq":r}})
+        if not r in result:
+            manga.disconnect()
+            return r
+             
+    manga.disconnect()
+    return False
 
-    return df.loc[now >= df['data_inicio']].loc[now <= df['data_fim']]['id']
+def first_insert(df) -> Iterable:
+    manga = ConnectionMongo()
+ 
+    for row in range(df.ndim):
+        manga.mongo['collection1'].insert_one(df.iloc[row,:].to_dict())
+    
+    manga.disconnect()
 
 
-def alter_table(df, id, val) -> None:
-    df.loc[df['id']==id, 'consumo_material(cm)'] = val
+def convert_dict_datetime(data):
+    keys_ = ['start_time', 'end_time', 'date-time']
+    for k in keys_:
+        if k.endswith('time'):
+            data[k] = datetime.datetime.strptime(data[k], "%Y-%m-%d %H:%M:%S")
+    
+    return data
+
+def check_alter():
+    
+    mongo = ConnectionMongo()
+    all_distances = mongo.mongo['collection2'].find({"distance":{"$gte":1}})
+
+    for dates in all_distances:
+        consumption = mongo.mongo['collection1'].find_one({"$and":[{"data_inicio":{"$gte":dates['start_time']}}, 
+                                                          {"data_fim":{"$lte":dates['end_time']}}]})["consumo_material(cm)"]
+
+        mongo.mongo['collection1'].find_one_and_update({"$and":[{"data_inicio":{"$gte":dates['start_time']}}, 
+                                                                {"data_fim":{"$lte":dates['end_time']}}]},
+                                                                {"$set":{"consumo_material(cm)":dates['distance']+consumption}})
+        
+    
+
+
