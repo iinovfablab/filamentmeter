@@ -16,6 +16,7 @@ class DetectaEnvento:
         
         
         
+        
     
     def canHandle(self, topic):
         return topic == "inovfablab/filamento" 
@@ -33,33 +34,23 @@ class DetectaEnvento:
         
 
         if topic.endswith("filamento"):
+
             data = json.loads(payload)
-            flag = data["finish"]
-            try:
-                data = convert_dict_datetime(data)
-                mongo.mongo['collection2'].insert_one(data)
+        
+            data = convert_dict_datetime(data)
+            mongo.mongo['collection2'].insert_one(data)
+            slts = sl.slots()
+            dd = {}
+            for key, value in zip(columns, list(zip(*slts))):
+                dd[key] = list(value)
+            df = pd.DataFrame.from_dict(dd)
+            df = insert_row_distinct(df)
+            first_insert(df)
+            #check_alter()
+            self.logger.debug(f"|| BANCO DE DADOS ATUALIZADO COM SUCESSO")
+            self.logger.debug(f"|| mensagem recebidas {data} ||")
 
-            except:
-                pass
-
-            finally:
-
-                slts = sl.slots()
-                dd = {}
-                for key, value in zip(columns, list(zip(*slts))):
-                    dd[key] = list(value)
-
-                df = pd.DataFrame.from_dict(dd)
                 
-                df = insert_row_distinct(df)
-                
-
-                if flag:
-                    first_insert(df)
-                    check_alter()
-                    self.logger.debug(f"|| BANCO DE DADOS ATUALIZADO COM SUCESSO")
-
-                self.logger.debug(f"|| mensagem recebidas {data} ||")
 
 
 

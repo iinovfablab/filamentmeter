@@ -16,11 +16,13 @@ class ConnectionMongo:
 
     def query(self, q:dict, collection) -> Any:
         result = self.mongo[collection].find(q)
+        self.disconnect()
         return result
 
     
     def query_update(self, q:dict, updated:dict, collection) -> None:
         self.mongo[collection].find_one_and_update(q, updated)
+        self.disconnect()
     
 
     def disconnect(self) -> None:

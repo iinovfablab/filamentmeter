@@ -3,6 +3,7 @@ from typing import Any, Iterable
 import pandas as pd
 import os
 from connections.connection_mongo import ConnectionMongo
+import re
 
 def convert_dt(dt) -> list():
     fdate = str(dt.datetime.now()).split()[0]
@@ -15,10 +16,12 @@ def reverse_key_to_value(d: list) -> dict:
 
 
 def insert_row_distinct(df):
+    
     fuso = datetime.timedelta(hours=3)
     df[['data_inicio','data_fim']] = df[['data_inicio','data_fim']].apply(lambda x: x-fuso)
-    #cv_int = lambda x: int(x.split(':')[1])
-    
+    df['consumo(minutos)'] = df['consumo(minutos)'].apply(lambda x: x.seconds/60)
+    cv_int = lambda x: int(x.split(':')[1])
+    #df['consumo(minutos)'] = df['consumo(minutos)'].apply(cv_int)
     df[['data_inicio','data_fim']] = df[['data_inicio','data_fim']].apply(pd.to_datetime)
     
 
@@ -32,7 +35,7 @@ def insert_row_distinct(df):
     for c in range(0,tl,2):
         lt.append(tuple(df_x.unique()[c:c+2]))
 
-    #filstra respectivos
+    #filtra respectivos
 
     for id,name in lt:
         df_username = df.loc[df['username']==name]
@@ -40,7 +43,8 @@ def insert_row_distinct(df):
         minn = df_username['data_inicio'].min()
         maxx = df_username['data_fim'].max()
         
-        new_row = {"consumo(minutos)":df_username['consumo(minutos)'].sum(),
+        new_row = {"reserva(minutos)":df_username['consumo(minutos)'].sum(),
+                   "tempo_de_maquina_usado(minutos)":0,
                    "id":id,
                    "username":name,
                    "data_inicio":[minn],
@@ -51,8 +55,10 @@ def insert_row_distinct(df):
                   }
         
         dfs.append(pd.DataFrame.from_dict(new_row))
-        
-    return pd.concat(dfs, ignore_index=True)
+    
+    dfT = pd.concat(dfs, ignore_index=True)
+    dfT.to_excel("oi.xlsx")
+    return dfT
 
 
 
@@ -71,33 +77,48 @@ def check_if_exists(df) -> Any:
 
 def first_insert(df) -> Iterable:
     manga = ConnectionMongo()
- 
-    for row in range(df.ndim):
+    
+    
+    for row in range(df.shape[0]):
         manga.mongo['collection1'].insert_one(df.iloc[row,:].to_dict())
     
     manga.disconnect()
 
 
 def convert_dict_datetime(data):
-    keys_ = ['start_time', 'end_time', 'date-time']
+    keys_ = ['start_time', 'end_time']
     for k in keys_:
-        if k.endswith('time'):
-            data[k] = datetime.datetime.strptime(data[k], "%Y-%m-%d %H:%M:%S")
+        data[k] = datetime.datetime.strptime(data[k], "%Y-%m-%d %H:%M:%S")
     
     return data
 
-def check_alter():
+def replace_date_to_datetime(d):
+    dt = list(map(lambda x: int(x),re.split("-| |:", d)))
+    return datetime.datetime(*dt)
+
+def check_alter(date):
     
     mongo = ConnectionMongo()
     all_distances = mongo.mongo['collection2'].find({"distance":{"$gte":1}})
+    all_users = mongo.mongo['collection1'].find({"start_time"})
+    all_distances = list(map(convert_dict_datetime, all_distances))
+
+    print(mongo.mongo['collection1'].find({"$gte":1}))
 
     for dates in all_distances:
-        consumption = mongo.mongo['collection1'].find_one({"$and":[{"data_inicio":{"$gte":dates['start_time']}}, 
-                                                          {"data_fim":{"$lte":dates['end_time']}}]})["consumo_material(cm)"]
+        
+        #consumption = mongo.mongo['collection1'].find_one({"$and":[{"data_inicio":{"$gte":dates['start_time']}}, 
+                                                        #{"data_fim":{"$lte":dates['end_time']}}]})["consumo_material(cm)"]
 
-        mongo.mongo['collection1'].find_one_and_update({"$and":[{"data_inicio":{"$gte":dates['start_time']}}, 
-                                                                {"data_fim":{"$lte":dates['end_time']}}]},
-                                                                {"$set":{"consumo_material(cm)":dates['distance']+consumption}})
+        #mongo.mongo['collection1'].find_one_and_update({"$and":[{"data_inicio":{"$gte":dates['start_time']}}, 
+                                                                #{"data_fim":{"$lte":dates['end_time']}}]},
+                                                                #{"$set":{"consumo_material(cm)":dates['distance']+consumption}})
+        pass
+
+    mongo.disconnect()
+
+
+
         
     
 

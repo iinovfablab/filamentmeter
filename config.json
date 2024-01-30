@@ -1,0 +1,21 @@
+{
+    "db": {
+        "host": "localhost",
+        "database": "fablab_production",
+        "user": "postgres",
+        "password": "",
+        "port": ""
+    },
+    "ssh": {
+        "ip/port": [
+            "172.16.0.70",
+            22
+        ],
+        "root": "root",
+        "password": "f@bl@b2018@#",
+        "remote_addres": [
+            "172.31.0.4",
+            5432
+        ]
+    }
+}

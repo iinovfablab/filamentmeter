@@ -89,7 +89,7 @@ void setup() {
 
 
 void loop() {
-  distanceNow = startMeasure();
+  
   
   timeClient.update();
   time_t epochTime = timeClient.getEpochTime();
@@ -101,48 +101,52 @@ void loop() {
   data["date-time"];
 
 
-  
-
   int monthDay = ptm->tm_mday;
   int currentMonth = ptm->tm_mon+1;
   String currentMonthName = meses[currentMonth-1];
   int currentYear = ptm->tm_year+1900;
 
 
-  String currentDate = String(currentYear) + "-" + String(currentMonth) + "-" + String(monthDay);
+  String currentDate = String(currentYear) + "-" + String(currentMonth) + "-" + String(monthDay) + " " + String(timeClient.getFormattedTime());
 
 
-  
+  distanceNow = startMeasure();
+
   if((distanceNow == distanceLast) && (second%20==0)){
-      _timeout = true;
-
+      
       if(end_send && (second >= 20) ){
         Serial.print("Data final: ");
         Serial.print(currentDate);
         Serial.print(" time: ");
         Serial.println(timeClient.getFormattedTime());
-        data["end_time"] = String(timeClient.getFormattedTime());
+        data["end_time"] = currentDate;
         data["distance"] = distanceNow*-1;
         data["date-time"] = currentDate;
         serializeJson(data, buffer);
         end_send = false;
         first_send = false;
+        _timeout = true;
+        distanceNow = startMeasure();
+        distanceLast = 0;
         mqttClient.publish(MQTT_PUB_TIME, 0, true, buffer);
+        
       }
     }
+  
   if(!first_send && (distanceNow != distanceLast)){
     Serial.print("Data inicial: ");
     Serial.print(currentDate);
     Serial.print(" time: ");
     Serial.println(timeClient.getFormattedTime());
-    data["start_time"] = String(timeClient.getFormattedTime());
-    
-
+    data["start_time"] = currentDate;
     first_send = true;
     end_send = true;
     second = 0;
 
   }
+
+  
+  
 
   else{
     _timeout = false;
@@ -154,12 +158,6 @@ void loop() {
 
 void tCallback(void *tCall){
   incrementSecond();
-  //Serial.print("distancia -> ");
-  //Serial.println(distanceNow);
-  //Serial.print("ultima distancia -> ");
-  //Serial.println(distanceLast);
-  //Serial.print("first_send: ");
-  //Serial.println(first_send);
 }
 void usrInit(void){
     os_timer_setfn(&mTimer, tCallback, NULL);

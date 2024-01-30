@@ -16,11 +16,12 @@ class SlotsModel(ConnectionDB):
     
     def slots(self):
 
-        fmt = "%Y-%m-%d %H:%M:%S"
 
         fdate = convert_dt(dt)
-        date_now = dt.datetime(*fdate)
-        date_next_day = date_now + dt.timedelta(1)
+        d = dt.datetime.now()
+
+        date_now = dt.datetime(d.year,d.month,d.day,5)
+        date_next_day = dt.datetime(d.year, d.month, d.day, 1)+dt.timedelta(1)
 
         self.params_db(jsonify())
         conn = self.connection_db()
@@ -37,4 +38,5 @@ class SlotsModel(ConnectionDB):
         cursor.execute(query,(date_now, date_next_day,))
         result = cursor.fetchall()
         conn.close()
+        print("[INFO] CONEXÃO BEM SUCEDIDA!")
         return result
